@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Meal Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F9F6F1;
+  --card: #FFFFFF;
+  --deep: #1C1A17;
+  --muted: #8A8278;
+  --border: #E8E2D9;
+  --accent1: #C4724A;
+  --accent2: #4A7C6B;
+  --accent3: #6B5B9E;
+  --accent4: #B85C6E;
+  --accent5: #3A6EA5;
+  --soft: #F2EDE6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--deep); padding: 1.5rem 1rem 3rem; min-height: 100vh; }
+h1 { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 400; text-align: center; margin-bottom: 4px; }
+.subtitle { text-align: center; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.5rem; }
+.tabs { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin-bottom: 1.5rem; }
+.tab { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding: 7px 14px; border: 1px solid var(--border); border-radius: 30px; background: transparent; color: var(--muted); cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+.tab.active { background: var(--deep); color: white; border-color: var(--deep); }
+.panel { display: none; max-width: 620px; margin: 0 auto; }
+.panel.active { display: block; }
+.day-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; margin-bottom: 12px; overflow: hidden; }
+.day-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; }
+.day-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.day-name { font-size: 13px; font-weight: 500; min-width: 70px; }
+.day-meal-preview { font-size: 12px; color: var(--muted); flex: 1; }
+.day-kcal { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 500; white-space: nowrap; }
+.chev { font-size: 11px; color: var(--muted); transition: transform 0.2s; }
+.day-card.open .chev { transform: rotate(180deg); }
+.day-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--border); }
+.day-card.open .day-body { display: block; }
+.meal-name { font-family: 'Playfair Display', serif; font-size: 17px; font-style: italic; margin: 12px 0 4px; }
+.meal-vibe { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 10px; }
+.section-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; margin-top: 12px; }
+.ingr-list { list-style: none; padding: 0; }
+.ingr-list li { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; padding: 5px 0; border-bottom: 1px solid var(--border); gap: 10px; }
+.ingr-list li:last-child { border-bottom: none; }
+.ingr-cal { font-size: 11px; color: var(--muted); white-space: nowrap; background: var(--soft); padding: 1px 7px; border-radius: 8px; }
+.method-text { font-size: 12.5px; color: var(--muted); line-height: 1.7; margin-top: 4px; }
+.method-text strong { color: var(--deep); font-weight: 500; }
+.batch-box { background: #EAF3DE; border-radius: 10px; padding: 8px 12px; margin-top: 10px; font-size: 12px; color: #3B6D11; line-height: 1.5; }
+.tag-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
+.tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: var(--soft); color: var(--muted); }
+.total-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.total-bar-outer { flex: 1; height: 3px; background: var(--border); border-radius: 2px; }
+.total-bar-inner { height: 3px; border-radius: 2px; }
+.total-label { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.rule-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; }
+.rule-title { font-size: 13px; font-weight: 500; color: var(--deep); margin-bottom: 5px; }
+.rule-text { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+.dessert-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 16px; margin-bottom: 12px; }
+.dessert-name { font-family: 'Playfair Display', serif; font-size: 18px; font-style: italic; margin-bottom: 4px; }
+.dessert-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 10px; }
+.dessert-toggle { font-size: 11px; padding: 5px 12px; border: 1px solid var(--border); border-radius: 20px; background: transparent; color: var(--muted); cursor: pointer; font-family: 'Inter', sans-serif; }
+.dessert-body { display: none; margin-top: 12px; }
+.dessert-card.open .dessert-body { display: block; }
+.tip-box { background: var(--soft); border-radius: 12px; padding: 12px 14px; margin-top: 10px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+.grocery-section { margin-bottom: 1.2rem; }
+.grocery-title { font-size: 12px; font-weight: 500; color: var(--deep); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.grocery-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.grocery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.grocery-item { font-size: 12px; color: var(--muted); padding: 5px 10px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; gap: 6px; }
+.grocery-item::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+.warn-box { background: #FFF8E1; border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; font-size: 12px; color: #7A6010; line-height: 1.6; }
+.warn-box strong { color: #5A4608; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<h1>Your weekly meal plan</h1>
+<div class="subtitle">Mon–Fri dinners · repeatable · ~650 kcal · IBS/FODMAP/GF compliant</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('week')">🗓 5-day plan</button>
+  <button class="tab" onclick="switchTab('rotate')">🔄 Rotation swaps</button>
+  <button class="tab" onclick="switchTab('desserts')">🍰 Weekend desserts</button>
+  <button class="tab" onclick="switchTab('grocery')">🛒 15-day grocery</button>
+  <button class="tab" onclick="switchTab('batch')">📦 Batch cooking</button>
+  <button class="tab" onclick="switchTab('weekend')">🫓 Weekend cooking</button>
+</div>
+
+<div id="panel-week" class="panel active"></div>
+<div id="panel-rotate" class="panel"></div>
+<div id="panel-desserts" class="panel"></div>
+<div id="panel-grocery" class="panel"></div>
+<div id="panel-batch" class="panel"></div>
+<div id="panel-weekend" class="panel"></div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const map = ['week','rotate','desserts','grocery','batch','weekend'];
+  document.querySelectorAll('.tab')[map.indexOf(id)].classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+}
+
+// ── WEEK PLAN ────────────────────────────────────────────────
+const days = [
+  {
+    name: "Monday", color: "#C4724A", bg: "#FBF0EA",
+    meal: "Poulet teriyaki maison + riz jasmin + courgette grillée",
+    vibe: "Asian-inspired · caramelised · satisfying",
+    ingredients: [
+      { name: "150g chicken breast (batch-cooked, sliced)", cal: "~165 kcal" },
+      { name: "80g jasmine rice (dry)", cal: "~290 kcal" },
+      { name: "1 courgette, sliced lengthways", cal: "~25 kcal" },
+      { name: "Sauce: 1 tbsp date syrup + ginger powder + garlic powder + water", cal: "~40 kcal" },
+      { name: "1 tsp garlic-infused olive oil", cal: "~40 kcal" },
+      { name: "10g pumpkin seeds (sprinkle)", cal: "~55 kcal" },
+    ],
+    method: "<strong>Batch chicken already cooked</strong> — just slice and reheat in pan with the date syrup sauce 2 min until caramelised and sticky. <strong>Airfryer</strong> courgette slices 8 min at 200°C with garlic oil. Cook rice. <strong>Plate:</strong> rice base, fanned chicken on top, courgette alongside, pumpkin seeds over everything. The date syrup gives a deep umami-sweet glaze almost identical to teriyaki.",
+    batch: "Uses batch chicken — reheat + sauce only. Dinner ready in 10 min.",
+    total: 615,
+    tags: ["Batch chicken", "10 min dinner", "FODMAP safe", "No gluten", "No lactose"]
+  },
+  {
+    name: "Tuesday", color: "#4A7C6B", bg: "#EAF2EF",
+    meal: "Bowl bœuf épicé + patate douce + épinards en sauce tomate",
+    vibe: "Middle-Eastern · warming · colourful",
+    ingredients: [
+      { name: "150g lean beef mince (batch-cooked)", cal: "~210 kcal" },
+      { name: "200g sweet potato, diced", cal: "~170 kcal" },
+      { name: "Big handful spinach (stirred into sauce — not alone)", cal: "~10 kcal" },
+      { name: "100ml tomato passata", cal: "~30 kcal" },
+      { name: "1 tsp olive oil", cal: "~40 kcal" },
+      { name: "Spices: cumin + ras el hanout + cinnamon + garlic powder", cal: "~5 kcal" },
+      { name: "50g coconut yogurt (cold dollop)", cal: "~45 kcal" },
+    ],
+    method: "<strong>Airfryer</strong> sweet potato 12 min at 200°C. <strong>Reheat</strong> batch mince in pan + passata + spices 5 min. Stir spinach into the sauce — it wilts in 1 min and disappears into the sauce exactly the way you like it. <strong>Plate:</strong> sweet potato base, spiced mince + spinach sauce on top, cold coconut yogurt dollop. Hot/cold contrast is the move.",
+    batch: "Uses batch beef mince — reheat in sauce only. 12 min total.",
+    total: 510,
+    tags: ["Batch beef", "Spinach in sauce ✓", "FODMAP safe", "No gluten", "No lactose"]
+  },
+  {
+    name: "Wednesday", color: "#6B5B9E", bg: "#EEE9F8",
+    meal: "Crevettes + vermicelles de riz + haricots verts + sauce citron-herbes",
+    vibe: "Light · aromatic · fresh",
+    ingredients: [
+      { name: "180g pre-cooked frozen shrimp (defrost in cold water 10 min)", cal: "~144 kcal" },
+      { name: "70g rice vermicelli (dry)", cal: "~252 kcal" },
+      { name: "Handful green beans, steamed 4 min", cal: "~20 kcal" },
+      { name: "1 tsp garlic-infused olive oil", cal: "~40 kcal" },
+      { name: "Sauce: lemon juice + garlic powder + fresh parsley + date syrup (few drops)", cal: "~20 kcal" },
+    ],
+    method: "<strong>Defrost</strong> shrimp in cold water — already cooked, just needs warming. <strong>Soak</strong> vermicelli in boiling water 3 min, drain. <strong>Steam</strong> green beans 4 min. <strong>Pan</strong>: warm shrimp in garlic oil 1 min each side. Add lemon sauce, toss everything together. <strong>Plate:</strong> noodles base, shrimp + green beans on top, fresh parsley over. No hot cherry tomatoes — kept cold in salad if desired alongside.",
+    batch: "Pre-cooked shrimp from frozen — zero batch prep needed. Fastest dinner of the week.",
+    total: 476,
+    tags: ["No batch needed", "15 min", "FODMAP safe", "No gluten", "No lactose"]
+  },
+  {
+    name: "Thursday", color: "#B85C6E", bg: "#F8ECF0",
+    meal: "Saumon airfryer + grenaille rôties + mozzarella + tomates fraîches",
+    vibe: "Bistro · elegant · Italian touch",
+    ingredients: [
+      { name: "150g frozen salmon fillet (defrost overnight or cold water)", cal: "~280 kcal" },
+      { name: "180g grenaille potatoes, halved", cal: "~135 kcal" },
+      { name: "50g fresh mozzarella (lactose-free if found, else pill)", cal: "~125 kcal" },
+      { name: "80g cherry tomatoes (cold, sliced — not cooked)", cal: "~14 kcal" },
+      { name: "1 tsp olive oil (potatoes)", cal: "~40 kcal" },
+      { name: "Coating: mustard + herbes de Provence + garlic powder", cal: "~15 kcal" },
+      { name: "Fresh basil + drizzle olive oil (finish)", cal: "~10 kcal" },
+    ],
+    method: "<strong>Boil</strong> grenaille 12 min, halve and airfryer 10 min with olive oil until golden. <strong>Coat</strong> salmon in mustard + herbs. <strong>Airfryer</strong> salmon 8 min at 200°C — golden outside, flaky inside. <strong>Assemble:</strong> potatoes on plate, salmon on top, cold mozzarella + raw cherry tomatoes + fresh basil on the side like a mini caprese. The cold Italian side contrasts beautifully with the hot salmon.",
+    batch: "Frozen salmon — defrost overnight in fridge or 15 min in cold water. No batch needed.",
+    total: 619,
+    tags: ["Mozzarella ✓", "Cold tomatoes ✓", "Frozen salmon", "Bistro feel", "Take lactase for mozz"]
+  },
+  {
+    name: "Friday", color: "#3A6EA5", bg: "#E8EEF6",
+    meal: "Pasta GF bolognaise + aubergine rôtie + mozzarella fondue",
+    vibe: "Friday comfort · rich · Italian soul",
+    ingredients: [
+      { name: "80g GF pasta (dry)", cal: "~280 kcal" },
+      { name: "120g lean beef mince (batch-cooked)", cal: "~168 kcal" },
+      { name: "½ aubergine, cubed", cal: "~20 kcal" },
+      { name: "150ml tomato passata + 1 tbsp tomato paste", cal: "~50 kcal" },
+      { name: "40g fresh mozzarella, torn on top", cal: "~100 kcal" },
+      { name: "1 tsp olive oil", cal: "~40 kcal" },
+      { name: "Spices: oregano + basil + garlic powder", cal: "~5 kcal" },
+    ],
+    method: "<strong>Airfryer</strong> aubergine cubes 12 min at 200°C until golden and smoky. <strong>Reheat</strong> batch mince + passata + tomato paste + spices 8 min until rich and thick. <strong>Cook</strong> GF pasta per pack. <strong>Plate:</strong> pasta + bolognaise + aubergine stirred through. Tear mozzarella on top while pasta is still hot — it melts slightly into the sauce. This is your Friday treat meal and it earns it.",
+    batch: "Uses batch beef — reheat in sauce only. Mozzarella replaces nutritional yeast perfectly.",
+    total: 663,
+    tags: ["Batch beef", "Mozzarella instead of yeast ✓", "Friday comfort", "Take GluteoStop + lactase"]
+  }
+];
+
+const weekPanel = document.getElementById('panel-week');
+weekPanel.innerHTML = `<div style="font-size:11px;color:var(--muted);margin-bottom:1rem;background:var(--soft);border-radius:10px;padding:10px 14px;line-height:1.8;"><strong style="color:var(--deep);">Meal IDs — reference these when adding to calendar:</strong><br>
+<span style="color:#C4724A;">W1</span> Mon · Poulet teriyaki &nbsp;|&nbsp; <span style="color:#4A7C6B;">W2</span> Tue · Bœuf patate douce &nbsp;|&nbsp; <span style="color:#6B5B9E;">W3</span> Wed · Crevettes vermicelles<br>
+<span style="color:#B85C6E;">W4</span> Thu · Saumon grenaille mozza &nbsp;|&nbsp; <span style="color:#3A6EA5;">W5</span> Fri · Pasta bolognaise mozza</div>`;
+days.forEach((d, i) => {
+  const ids = ['W1','W2','W3','W4','W5'];
+  const pct = Math.min(100, Math.round(d.total / 680 * 100));
+  const barColor = d.total > 680 ? '#E24B4A' : '#1D9E75';
+  const card = document.createElement('div');
+  card.className = 'day-card';
+  card.innerHTML = `
+    <div class="day-header" onclick="this.parentElement.classList.toggle('open')">
+      <div class="day-dot" style="background:${d.color};"></div>
+      <span style="font-size:10px;font-weight:600;color:${d.color};background:${d.bg};padding:2px 7px;border-radius:8px;flex-shrink:0;">${ids[i]}</span>
+      <span class="day-name">${d.name}</span>
+      <span class="day-meal-preview" style="color:${d.color};">${d.meal.split('+')[0].trim()}</span>
+      <span class="day-kcal" style="background:${d.bg}; color:${d.color};">~${d.total} kcal</span>
+      <span class="chev">▼</span>
+    </div>
+    <div class="day-body">
+      <div class="meal-name">${d.meal}</div>
+      <div class="meal-vibe" style="color:${d.color};">${d.vibe}</div>
+      <div class="section-label">Ingredients</div>
+      <ul class="ingr-list">
+        ${d.ingredients.map(i => `<li><span>${i.name}</span><span class="ingr-cal">${i.cal}</span></li>`).join('')}
+      </ul>
+      <div class="section-label">Method</div>
+      <p class="method-text">${d.method}</p>
+      <div class="batch-box">📦 ${d.batch}</div>
+      <div class="total-row">
+        <div class="total-bar-outer"><div class="total-bar-inner" style="width:${pct}%; background:${barColor};"></div></div>
+        <span class="total-label">~${d.total} / 680 kcal budget</span>
+      </div>
+      <div class="tag-row">${d.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+    </div>`;
+  weekPanel.appendChild(card);
+});
+
+// ── ROTATION SWAPS ───────────────────────────────────────────
+const rotations = [
+  {
+    name: "Thon méditerranéen + grenaille + olives + tomates froides",
+    vibe: "No cooking · Mediterranean · 10 min",
+    color: "#3A6EA5", bg: "#E8EEF6",
+    total: 480,
+    ingredients: [
+      { name: "1 can tuna in water, drained", cal: "~120 kcal" },
+      { name: "180g grenaille potatoes, boiled", cal: "~135 kcal" },
+      { name: "80g cold cherry tomatoes, halved", cal: "~14 kcal" },
+      { name: "10 olives", cal: "~50 kcal" },
+      { name: "½ cucumber, sliced", cal: "~8 kcal" },
+      { name: "Dressing: 1 tsp olive oil + mustard + cider vinegar", cal: "~55 kcal" },
+    ],
+    method: "<strong>Boil</strong> grenaille 12 min, halve. <strong>Toss</strong> cold tuna + olives + cherry tomatoes + cucumber in dressing. <strong>Plate:</strong> warm potatoes as base, cold tuna salad on top. The hot/cold contrast is the whole point. Zero stress, no batch needed.",
+    batch: "No batch needed — tuna from can, potatoes boil in 12 min.",
+    tags: ["No batch needed", "10 min", "FODMAP safe", "No gluten", "No lactose"]
+  },
+  {
+    name: "Tortillas maïs + poulet effiloché + concombre + tomates froides",
+    vibe: "Festive · fresh · fold and eat",
+    color: "#C4724A", bg: "#FBF0EA",
+    total: 520,
+    ingredients: [
+      { name: "2 corn tortillas", cal: "~120 kcal" },
+      { name: "150g batch chicken, shredded cold", cal: "~165 kcal" },
+      { name: "½ cucumber, sliced thin", cal: "~8 kcal" },
+      { name: "80g cold cherry tomatoes, halved", cal: "~14 kcal" },
+      { name: "50g coconut yogurt (instead of sour cream)", cal: "~45 kcal" },
+      { name: "Fresh parsley or coriander + salt + garlic powder", cal: "~5 kcal" },
+    ],
+    method: "<strong>Warm</strong> corn tortillas 30 sec each in a dry pan. <strong>Mix</strong> chicken with garlic powder + salt. <strong>Fill</strong> each tortilla: coconut yogurt first, then chicken, cucumber, cold cherry tomatoes, fresh herbs. Fold and eat. Fully FODMAP safe — no avocado.",
+    batch: "Uses batch chicken — shred cold, takes 2 min.",
+    tags: ["Batch chicken", "No gluten", "FODMAP safe", "No lactose", "15 min"]
+  },
+  {
+    name: "Risotto courgette-épinards + crevettes + mozza",
+    vibe: "Comfort · creamy · spinach in cream",
+    color: "#4A7C6B", bg: "#EAF2EF",
+    total: 620,
+    ingredients: [
+      { name: "60g arborio rice (dry)", cal: "~210 kcal" },
+      { name: "600ml chicken or veg stock", cal: "~20 kcal" },
+      { name: "150g pre-cooked shrimp, defrost + warm 2 min", cal: "~120 kcal" },
+      { name: "1 courgette, diced small", cal: "~25 kcal" },
+      { name: "Handful spinach (stirred into risotto at end)", cal: "~10 kcal" },
+      { name: "40g fresh mozzarella, torn on top", cal: "~100 kcal" },
+      { name: "1 tsp garlic-infused olive oil", cal: "~40 kcal" },
+      { name: "Black pepper + herbs", cal: "~0 kcal" },
+    ],
+    method: "<strong>Heat</strong> garlic oil in pan, add rice, toast 1 min. Add hot stock ladle by ladle over 18 min stirring regularly. Add courgette at 10 min mark. <strong>Stir</strong> spinach into risotto last 2 min — it wilts into the cream and disappears. <strong>Plate:</strong> risotto bowl, warm shrimp on top, torn mozzarella over everything. Take lactase for mozz.",
+    batch: "Shrimp: defrost in cold water 10 min, pan-warm 2 min. No batch prep.",
+    tags: ["Spinach in cream ✓", "No gluten", "Take lactase for mozz", "Weekend worthy"]
+  },
+  {
+    name: "Saumon fumé + riz froid + concombre + graines de courge",
+    vibe: "Zero cooking · assembly only · 3 min",
+    color: "#B85C6E", bg: "#F8ECF0",
+    total: 510,
+    ingredients: [
+      { name: "100g smoked salmon", cal: "~160 kcal" },
+      { name: "150g cold batch rice", cal: "~195 kcal" },
+      { name: "1 cucumber, diced", cal: "~15 kcal" },
+      { name: "10g pumpkin seeds", cal: "~55 kcal" },
+      { name: "Skyr sauce: 80g skyr + dill + garlic powder + water", cal: "~50 kcal" },
+    ],
+    method: "<strong>Assemble:</strong> cold rice base, cucumber, smoked salmon on top, pumpkin seeds scattered. <strong>Mix</strong> skyr with dill + garlic powder + splash of water until pourable. Drizzle over. Zero cooking — your emergency tired-evening dinner.",
+    batch: "Uses batch rice — assemble in 3 min flat.",
+    tags: ["Zero cooking", "Batch rice", "No gluten", "FODMAP safe", "Emergency dinner"]
+  },
+  {
+    name: "Flatbread maison + bœuf épicé + aubergine + mozza",
+    vibe: "Open-face · gourmet pizza vibes",
+    color: "#6B5B9E", bg: "#EEE9F8",
+    total: 630,
+    ingredients: [
+      { name: "2 homemade buckwheat flatbreads (batch)", cal: "~160 kcal" },
+      { name: "150g batch beef mince, reheated with spices", cal: "~210 kcal" },
+      { name: "½ aubergine, cubed + airfryer 12 min", cal: "~20 kcal" },
+      { name: "40g fresh mozzarella, torn", cal: "~100 kcal" },
+      { name: "Coconut yogurt (spread as base)", cal: "~30 kcal" },
+      { name: "Fresh parsley + cumin + ras el hanout", cal: "~5 kcal" },
+    ],
+    method: "<strong>Warm</strong> flatbreads 30 sec in dry pan. <strong>Spread</strong> coconut yogurt as the base. <strong>Reheat</strong> beef with cumin + ras el hanout 3 min. <strong>Top:</strong> beef mince + roasted aubergine + torn mozzarella + fresh parsley. Eat open-face — looks stunning, tastes like a gourmet flatbread pizza. Take lactase for mozz.",
+    batch: "Uses batch beef + batch flatbreads — reheat only.",
+    tags: ["Batch beef + flatbread", "No gluten", "Take lactase", "Impressive plate"]
+  },
+  {
+    name: "Boulettes sauce tomate + vermicelles de riz",
+    vibe: "Comfort food · Italian soul · no gluten",
+    color: "#A83020", bg: "#FAEAE8",
+    total: 590,
+    ingredients: [
+      { name: "150g batch beef mince, shaped into small balls", cal: "~210 kcal" },
+      { name: "70g rice vermicelli (dry)", cal: "~252 kcal" },
+      { name: "200ml tomato passata", cal: "~60 kcal" },
+      { name: "½ tsp olive oil", cal: "~20 kcal" },
+      { name: "Oregano + basil + garlic powder + black pepper", cal: "~5 kcal" },
+    ],
+    method: "<strong>Shape</strong> cold batch mince into walnut-sized balls. <strong>Airfryer</strong> 12 min at 200°C until golden. <strong>Simmer</strong> passata + garlic powder + oregano + basil 5 min. Add meatballs to sauce, simmer 5 min more. <strong>Soak</strong> vermicelli in boiling water 3 min, drain. Plate noodles + meatballs + sauce on top.",
+    batch: "Uses batch beef mince — shape + airfryer only.",
+    tags: ["Batch beef", "No gluten", "FODMAP safe", "Comfort food"]
+  },
+  {
+    name: "Sardines + patate douce + mix légumes rôtis",
+    vibe: "Cheapest dinner · zero protein cooking · nutrient bomb",
+    color: "#4A7C6B", bg: "#EAF2EF",
+    total: 520,
+    ingredients: [
+      { name: "1 can sardines in olive oil, drained", cal: "~190 kcal" },
+      { name: "200g sweet potato, cubed", cal: "~170 kcal" },
+      { name: "½ courgette + ½ aubergine, cubed", cal: "~35 kcal" },
+      { name: "4 cherry tomatoes (add last 5 min only — cooked into veg)", cal: "~7 kcal" },
+      { name: "1 tsp garlic-infused olive oil + herbes de Provence", cal: "~40 kcal" },
+    ],
+    method: "<strong>Airfryer</strong> sweet potato 12 min at 200°C. Add courgette + aubergine, cook 8 min more. Add cherry tomatoes last 5 min (cooked into veg = FODMAP safe, not raw). <strong>Plate:</strong> veg mix as base, sardines flaked on top. Season with herbes de Provence + olive oil. ⚠️ Check can label: plain in olive oil only, no added garlic/onion sauce.",
+    batch: "No batch needed — sardines from can, veg in airfryer.",
+    tags: ["No batch", "Cheapest dinner", "No gluten", "FODMAP safe", "Omega-3 rich"]
+  },
+  {
+    name: "Riz au four sauce tomate + poulet ou bœuf",
+    vibe: "Completely hands-off · one dish · one wash",
+    color: "#C47020", bg: "#FDF0E0",
+    total: 600,
+    ingredients: [
+      { name: "80g dry jasmine rice", cal: "~290 kcal" },
+      { name: "150g batch chicken (sliced) or beef mince", cal: "~165–210 kcal" },
+      { name: "150ml tomato passata", cal: "~45 kcal" },
+      { name: "300ml chicken or veg stock", cal: "~15 kcal" },
+      { name: "1 tsp garlic-infused olive oil", cal: "~40 kcal" },
+      { name: "Cumin + paprika + black pepper + herbes de Provence", cal: "~5 kcal" },
+    ],
+    method: "<strong>Oven dish:</strong> add dry rice + passata + stock + garlic oil + all spices, stir to combine. Lay batch chicken slices or mince on top. <strong>Cover</strong> tightly with foil. <strong>Oven</strong> 180°C for 35 min. Remove foil last 5 min to brown slightly. The rice absorbs all the tomato stock and becomes deeply flavourful. One dish, no stirring, completely hands-off. ⚠️ Use passata not chopped tomatoes — easier to digest.",
+    batch: "Uses batch chicken or beef — lay on top raw (the oven finishes it).",
+    tags: ["Batch protein", "Hands-off", "One dish", "No gluten", "FODMAP safe"]
+  },
+  {
+    name: "Curry coco + poulet + courgette + riz ⭐",
+    vibe: "Favourite · silky · fragrant · warming",
+    color: "#B85C6E", bg: "#F8ECF0",
+    total: 640,
+    ingredients: [
+      { name: "150g batch chicken breast, sliced", cal: "~165 kcal" },
+      { name: "80g jasmine rice (dry)", cal: "~290 kcal" },
+      { name: "1 courgette, diced", cal: "~25 kcal" },
+      { name: "150ml coconut cream", cal: "~200 kcal" },
+      { name: "1 tsp garlic-infused olive oil", cal: "~40 kcal" },
+      { name: "Spices: curry powder + turmeric + ginger + cumin (1 tsp each)", cal: "~10 kcal" },
+      { name: "Fresh coriander to finish (optional)", cal: "~0 kcal" },
+    ],
+    method: "<strong>Whisk</strong> coconut cream + all spices in pan. Heat on medium, simmer 3 min until fragrant and slightly golden. <strong>Add</strong> batch chicken slices + courgette. Simmer 8 min until courgette is tender and sauce is thick and glossy — stir occasionally. <strong>Cook</strong> rice separately. <strong>Plate:</strong> rice base, curry on top, fresh coriander over everything. ⚠️ Individual spices only — no curry paste (contains onion/garlic pulp = FODMAP).",
+    batch: "Uses batch chicken — slice cold, warms in sauce in 8 min.",
+    tags: ["⭐ Favourite", "Batch chicken", "No gluten", "FODMAP safe", "No lactose"]
+  }
+];
+
+const rotatePanel = document.getElementById('panel-rotate');
+rotatePanel.innerHTML = `
+  <div style="font-size:11px;color:var(--muted);margin-bottom:1rem;background:var(--soft);border-radius:10px;padding:10px 14px;line-height:1.8;">
+    <strong style="color:var(--deep);">Meal IDs — Rotations:</strong><br>
+    <span style="color:#3A6EA5;">R1</span> Thon grenaille &nbsp;|&nbsp; <span style="color:#C4724A;">R2</span> Tortillas poulet &nbsp;|&nbsp; <span style="color:#4A7C6B;">R3</span> Risotto crevettes &nbsp;|&nbsp; <span style="color:#B85C6E;">R4</span> Saumon fumé riz<br>
+    <span style="color:#6B5B9E;">R5</span> Flatbread bœuf &nbsp;|&nbsp; <span style="color:#A83020;">R6</span> Boulettes vermicelles &nbsp;|&nbsp; <span style="color:#4A7C6B;">R7</span> Sardines patate douce<br>
+    <span style="color:#C47020;">R8</span> Riz au four &nbsp;|&nbsp; <span style="color:#B85C6E;">R9</span> Curry coco ⭐
+  </div>`;
+const rIds = ['R1','R2','R3','R4','R5','R6','R7','R8','R9'];
+rotations.forEach((d, i) => {
+  const pct = Math.min(100, Math.round(d.total / 680 * 100));
+  const barColor = d.total > 680 ? '#E24B4A' : '#1D9E75';
+  const card = document.createElement('div');
+  card.className = 'day-card';
+  card.innerHTML = `
+    <div class="day-header" onclick="this.parentElement.classList.toggle('open')">
+      <div class="day-dot" style="background:${d.color};"></div>
+      <span style="font-size:10px;font-weight:600;color:${d.color};background:${d.bg};padding:2px 7px;border-radius:8px;flex-shrink:0;">${rIds[i]}</span>
+      <span class="day-name" style="min-width:unset;flex:1;color:${d.color};">${d.name.split('+')[0].trim()}</span>
+      <span class="day-kcal" style="background:${d.bg};color:${d.color};">~${d.total} kcal</span>
+      <span class="chev">▼</span>
+    </div>
+    <div class="day-body">
+      <div class="meal-name">${d.name}</div>
+      <div class="meal-vibe" style="color:${d.color};">${d.vibe}</div>
+      <div class="section-label">Ingredients</div>
+      <ul class="ingr-list">
+        ${d.ingredients.map(i => `<li><span>${i.name}</span><span class="ingr-cal">${i.cal}</span></li>`).join('')}
+      </ul>
+      <div class="section-label">Method</div>
+      <p class="method-text">${d.method}</p>
+      <div class="batch-box">📦 ${d.batch}</div>
+      <div class="total-row">
+        <div class="total-bar-outer"><div class="total-bar-inner" style="width:${pct}%;background:${barColor};"></div></div>
+        <span class="total-label">~${d.total} / 680 kcal budget</span>
+      </div>
+      <div class="tag-row">${d.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+    </div>`;
+  rotatePanel.appendChild(card);
+});
+
+// ── DESSERTS ─────────────────────────────────────────────────
+const desserts = [
+  {
+    name: "Banana bread protéiné au choco whey",
+    sub: "~120 kcal per slice · 8 slices · freezer-friendly ⭐ best option",
+    color: "#5C3A1E",
+    ingredients: [
+      { name: "4 very ripe bananas, mashed (~400g — extra banana replaces eggs)", cal: "~360 kcal total" },
+      { name: "2 scoops choco whey protein isolate (~60g)", cal: "~230 kcal" },
+      { name: "80g buckwheat flour or GF oat flour", cal: "~280 kcal" },
+      { name: "60ml coconut milk (replaces eggs for moisture)", cal: "~30 kcal" },
+      { name: "1 tsp baking powder (GF)", cal: "~5 kcal" },
+      { name: "1 tsp vanilla", cal: "~5 kcal" },
+      { name: "Pinch of salt", cal: "0 kcal" },
+    ],
+    method: "Preheat oven 175°C. Mash 4 bananas until completely smooth and liquid-like — the riper the better (black skin = perfect). Add coconut milk + vanilla, mix. Fold in whey protein + flour + baking powder + salt — don't overmix, lumps are fine. Batter will be thick. Pour into a lined loaf tin. Bake 35–40 min until a knife comes out clean (slightly longer than egg version — check at 35 min). Cool completely before slicing into 8. Wrap individually, freeze 5, fridge 3.",
+    note: "The 4th banana + whey protein act as the binding agent instead of eggs. The banana must be very ripe (spotty/black skin) — this is critical, underripe banana won't bind or sweeten enough. The result is actually more moist and banana-forward than the egg version."
+  },
+  {
+    name: "Moelleux citron & coco (sans beurre)",
+    sub: "~110 kcal per portion · 6 portions · fridge 4 days",
+    color: "#7A6B10",
+    ingredients: [
+      { name: "80g GF flour (buckwheat or rice flour)", cal: "~280 kcal" },
+      { name: "100ml coconut cream (replaces eggs — extra richness)", cal: "~200 kcal" },
+      { name: "2 tbsp honey", cal: "~120 kcal" },
+      { name: "Juice of 1 lemon + zest", cal: "~15 kcal" },
+      { name: "2 tsp baking powder GF (extra — needed without eggs)", cal: "~5 kcal" },
+      { name: "1 tsp vanilla", cal: "~5 kcal" },
+      { name: "Pinch of salt", cal: "0 kcal" },
+    ],
+    method: "Preheat oven 170°C. Whisk coconut cream + honey + lemon juice + zest + vanilla until smooth. Fold in flour + baking powder + salt — the extra baking powder compensates for the missing egg lift. Batter will be dense. Divide into 6 silicone muffin moulds. Bake 20–22 min until just set and slightly golden on top. They will be more fudgy/dense than the egg version — this is the correct texture, not a mistake. Cool before eating.",
+    note: "Without eggs these become richer and more fudgy — closer to a lemon fondant than a light cake. The coconut cream + lemon is an outstanding combination. The denser texture actually holds up better in the fridge across 4 days."
+  },
+  {
+    name: "Muffins choco-whey & myrtilles",
+    sub: "~100 kcal each · 6 muffins · freezer-friendly",
+    color: "#3D2B6E",
+    ingredients: [
+      { name: "2 scoops choco whey protein isolate (~60g)", cal: "~230 kcal" },
+      { name: "60g buckwheat flour", cal: "~210 kcal" },
+      { name: "2 tbsp apple sauce (replaces eggs — binder)", cal: "~30 kcal" },
+      { name: "100ml coconut milk (adds moisture)", cal: "~50 kcal" },
+      { name: "1 tbsp honey", cal: "~60 kcal" },
+      { name: "100g blueberries (fresh or frozen)", cal: "~57 kcal" },
+      { name: "1 tsp baking powder (GF)", cal: "~5 kcal" },
+      { name: "1 tsp vanilla", cal: "~5 kcal" },
+    ],
+    method: "Preheat oven 175°C. Mix whey + flour + baking powder in a bowl. Whisk apple sauce + coconut milk + honey + vanilla separately. Combine wet + dry — fold gently until just mixed. Fold blueberries in last. Divide into 6 muffin moulds. Bake 18–20 min (slightly longer than egg version — check at 18 min, toothpick should come out clean). Cool fully before eating or freezing.",
+    note: "Apple sauce is a classic egg replacer in muffins — it adds moisture and acts as a binder. You already have it in your pantry. The result is slightly denser but still very moist. Each muffin still has ~10–12g protein from the whey. Freeze 4 immediately, keep 2 in fridge."
+  },
+  {
+    name: "Panna cotta coco & coulis myrtilles",
+    sub: "~110 kcal per portion · 5 portions · fridge 3 days (no freeze)",
+    color: "#4A3060",
+    ingredients: [
+      { name: "400ml light coconut milk", cal: "~280 kcal total" },
+      { name: "2 tsp agar-agar", cal: "~5 kcal" },
+      { name: "1 tbsp honey", cal: "~60 kcal" },
+      { name: "1 tsp vanilla", cal: "~5 kcal" },
+      { name: "150g blueberries (coulis)", cal: "~85 kcal" },
+      { name: "1 tsp honey (coulis)", cal: "~20 kcal" },
+    ],
+    method: "Heat coconut milk + honey + vanilla + agar-agar, stir constantly until just boiling. Pour into 5 small glasses. Cool 10 min then fridge 2h+ until set. Coulis: heat blueberries + honey 3 min until they burst. Cool and spoon over each panna cotta before serving. Make Friday or Saturday — keeps 3 days.",
+    note: "Agar-agar is plant-based, available at Asian grocers or bio shops (Naturalia, Bio c'Bon). Works better than gelatin — sets firmer and works cold. Elegant, wobbles like restaurant panna cotta, zero dairy."
+  },
+  {
+    name: "Parfait skyr façon cheesecake & banane",
+    sub: "~100 kcal per portion · 5 portions · fridge 3 days",
+    color: "#3A4F7A",
+    ingredients: [
+      { name: "400g lactose-free skyr", cal: "~220 kcal total" },
+      { name: "2 tsp honey", cal: "~40 kcal" },
+      { name: "1 tsp vanilla", cal: "~5 kcal" },
+      { name: "2 bananas, sliced", cal: "~180 kcal" },
+      { name: "20g dark chocolate 85%, melted (drizzle)", cal: "~110 kcal" },
+      { name: "20g crushed rice cakes (base)", cal: "~75 kcal" },
+    ],
+    method: "Mix skyr + honey + vanilla until smooth. Crush rice cakes into coarse crumbs. Layer in 5 glasses: rice cake crumbs at bottom, skyr layer, banana slices on top. Drizzle melted dark chocolate over in a thin zigzag. Fridge 1h minimum. Looks like a proper cheesecake in a glass.",
+    note: "The banana + dark chocolate combo is one of the most satisfying dessert pairings. Rice cake crumbs mimic a biscuit base perfectly. Make Sunday evening, eat through Friday."
+  }
+];
+
+const dessertPanel = document.getElementById('panel-desserts');
+dessertPanel.innerHTML = `
+  <div style="font-size:12.5px;color:var(--muted);margin-bottom:8px;line-height:1.6;">Make one every weekend — 5–8 portions for the week. Rotate week to week. Cakes freeze individually, creams stay in fridge.</div>
+  <div class="warn-box"><strong>Whey tip:</strong> Your choco whey isolate is virtually lactose-free and FODMAP safe. It works as both a flour substitute (reduces calories) and a protein boost in baked goods. Use it in the banana bread and muffins first — they're the most freezer-friendly.</div>`;
+desserts.forEach(d => {
+  const div = document.createElement('div');
+  div.className = 'dessert-card';
+  div.innerHTML = `
+    <div class="dessert-name" style="color:${d.color};">${d.name}</div>
+    <div class="dessert-sub">${d.sub}</div>
+    <button class="dessert-toggle" onclick="this.parentElement.classList.toggle('open');this.textContent=this.parentElement.classList.contains('open')?'Hide ▲':'See recipe ▼'">See recipe ▼</button>
+    <div class="dessert-body">
+      <div class="section-label">Ingredients</div>
+      <ul class="ingr-list">${d.ingredients.map(i=>`<li><span>${i.name}</span><span class="ingr-cal">${i.cal}</span></li>`).join('')}</ul>
+      <div class="section-label">Method</div>
+      <p class="method-text">${d.method}</p>
+      <div class="tip-box">💡 ${d.note}</div>
+    </div>`;
+  dessertPanel.appendChild(div);
+});
+
+// ── 15-DAY GROCERY ───────────────────────────────────────────
+const grocery = {
+  "Proteins 🥩": [
+    "Chicken breast x6 (batch cook)", "Beef mince 5% fat x2 (600g total, batch)",
+    "Pre-cooked frozen shrimp x2 bags (180g each)", "Frozen salmon fillets x4 (150g each)",
+    "Smoked salmon x2 packs (100g each)", "Tuna in water x4 cans",
+    "Eggs x12", "Fresh mozzarella x3 balls (or LF version)"
+  ],
+  "Carbs 🍚": [
+    "Jasmine rice (1kg bag)", "GF pasta (500g bag)",
+    "Rice vermicelli (500g bag)", "Grenaille potatoes (1kg bag)",
+    "Sweet potatoes x6", "Corn tortillas x1 pack (8–10)",
+    "GF oats or buckwheat flour (for baking)", "Rice cakes x1 pack"
+  ],
+  "Vegetables 🥦": [
+    "Courgettes x6", "Aubergine x3",
+    "Green beans (500g bag frozen or fresh)", "Spinach (400g bag)",
+    "Carrots x6", "Cherry tomatoes x2 packs (250g each)",
+    "Cucumber x4", "Butternut squash x1 (rotation)"
+  ],
+  "Dairy & Fats 🥛": [
+    "Lactose-free skyr x6 pots (200g)", "Coconut yogurt x2 pots",
+    "Coconut milk x2 cans (light)", "Coconut cream x1 can",
+    "Garlic-infused olive oil x1 bottle", "Olive oil (if running low)"
+  ],
+  "Baking & Desserts 🍰": [
+    "Choco whey protein isolate (check stock)", "GF baking powder",
+    "Vanilla extract", "Honey x1 jar",
+    "Dark chocolate 85% x2 bars", "Blueberries x2 packs (fresh or frozen)",
+    "Bananas x10 (ripe ones for baking + eating)"
+  ],
+  "Sauces & Pantry 🫙": [
+    "Tomato passata x4 cartons", "Tomato paste x2 tubes",
+    "Mustard x1 jar", "Date syrup x1 bottle (replaces tamari)",
+    "Lemon x4", "Fresh parsley + fresh basil",
+    "Ras el hanout", "Cumin, cinnamon, ginger powder, garlic powder",
+    "Herbes de Provence", "Pumpkin seeds (100g bag)"
+  ]
+};
+
+const grocPanel = document.getElementById('panel-grocery');
+grocPanel.innerHTML = `
+  <div style="font-size:12.5px;color:var(--muted);margin-bottom:1rem;line-height:1.6;">This covers <strong>2 full weeks</strong> of dinners (5-day plan × 2 + rotation swaps). Buy once every 15 days. Fresh items like mozzarella, fresh herbs, and bananas may need a mid-point top-up.</div>
+  <div class="warn-box"><strong>Mid-point top-up (day 8):</strong> Fresh mozzarella · bananas · fresh herbs · cherry tomatoes</div>`;
+Object.entries(grocery).forEach(([cat, items]) => {
+  const sec = document.createElement('div');
+  sec.className = 'grocery-section';
+  sec.innerHTML = `<div class="grocery-title">${cat}</div><div class="grocery-grid">${items.map(i=>`<div class="grocery-item">${i}</div>`).join('')}</div>`;
+  grocPanel.appendChild(sec);
+});
+
+// ── BATCH COOKING ────────────────────────────────────────────
+document.getElementById('panel-batch').innerHTML = `
+  <div style="font-size:12.5px;color:var(--muted);margin-bottom:1rem;line-height:1.6;">Your Sunday system — 1.5 hours of cooking = 5 weeknight dinners done in 10 min each. Everything freezes except eggs and shrimp.</div>
+
+  <div class="rule-card">
+    <div class="rule-title">🍗 Chicken breast batch (30 min)</div>
+    <div class="rule-text">
+      Season 600g chicken breast with salt + garlic powder + herbes de Provence. Airfryer at 180°C for 18–20 min in batches (don't overcrowd). Cool completely. Slice half, leave half whole. Portion into 150g bags. <strong>Fridge:</strong> 3–4 days. <strong>Freeze:</strong> up to 3 months. Defrost in fridge overnight or cold water 20 min.
+    </div>
+  </div>
+
+  <div class="rule-card">
+    <div class="rule-title">🥩 Beef mince batch (20 min)</div>
+    <div class="rule-text">
+      Brown 600g lean mince in pan with olive oil + garlic powder + cumin + cinnamon — keep it lightly spiced so it works in multiple dishes (bolognaise, kofta bowl, flatbread). Don't add passata yet — add sauce when reheating for each specific dinner. Cool completely. Portion into 150g bags. <strong>Fridge:</strong> 3–4 days. <strong>Freeze:</strong> up to 3 months.
+    </div>
+  </div>
+
+  <div class="rule-card">
+    <div class="rule-title">🍚 Rice batch (15 min)</div>
+    <div class="rule-text">
+      Cook 300g dry jasmine rice. Cool completely before storing — warm rice in a closed container = bacteria risk. Spread on a tray to cool fast (10 min). Portion into 150g cooked portions. <strong>Fridge:</strong> 2 days max. <strong>Freeze:</strong> up to 1 month. Reheat with a splash of water in microwave 90 sec covered.
+    </div>
+  </div>
+
+  <div class="rule-card">
+    <div class="rule-title">🫓 Flatbread batch (20 min)</div>
+    <div class="rule-text">
+      Make 8–10 buckwheat flatbreads (120g buckwheat flour + 80ml water + 1 tsp oil + salt). Roll thin, dry pan 1–2 min each side. Stack with parchment between each. <strong>Fridge:</strong> 2 days. <strong>Freeze:</strong> yes, up to 1 month. Reheat 30 sec in dry pan straight from frozen.
+    </div>
+  </div>
+
+  <div class="rule-card">
+    <div class="rule-title">🍰 Dessert batch (30–40 min)</div>
+    <div class="rule-text">
+      Bake banana bread OR muffins while everything else cooks. They go in the oven and need no attention. Slice banana bread into 8, wrap individually in cling film, freeze 5 keep 3. Muffins: freeze 4, keep 2 in fridge. <strong>The dessert batch is the most time-efficient thing you do</strong> — 35 min oven time, zero active work, dessert for the whole week.
+    </div>
+  </div>
+
+  <div class="rule-card">
+    <div class="rule-title">🦐 Shrimp & 🐟 Salmon — no batch needed</div>
+    <div class="rule-text">
+      <strong>Shrimp:</strong> already pre-cooked frozen — just defrost in cold water 10 min before dinner, pan-warm 2 min. Keep in freezer, take out what you need.<br>
+      <strong>Salmon:</strong> frozen fillets — defrost overnight in fridge or 15 min in cold water. Airfryer 8 min. Never batch-cook fish — texture suffers when reheated.
+    </div>
+  </div>
+
+  <div class="rule-card">
+    <div class="rule-title">⏱ Sunday schedule (total ~1h30)</div>
+    <div class="rule-text">
+      <strong>Start:</strong> Put banana bread/muffins in oven first (35 min bake = passive time).<br>
+      <strong>While baking:</strong> Cook chicken batch in airfryer + mince batch on stovetop simultaneously.<br>
+      <strong>While meat cools:</strong> Cook rice batch.<br>
+      <strong>Last:</strong> Make flatbreads (10 min active).<br>
+      <strong>Finish:</strong> Portion everything into bags/containers. Label with date. Done.
+    </div>
+  </div>
+`;
+
+// ── WEEKEND COOKING ──────────────────────────────────────────
+const weekendRecipes = [
+  {
+    name: "Salade de carottes râpées",
+    kcal: "~80 kcal",
+    color: "#C4724A", bg: "#FBF0EA",
+    note: "✅ Add to any weekday dinner as a side — takes 3 min, no cooking",
+    ingredients: [
+      { n: "2 large carrots, peeled and grated", c: "~60 kcal" },
+      { n: "1 tsp olive oil", c: "~40 kcal" },
+      { n: "Juice of ½ lemon", c: "~5 kcal" },
+      { n: "1 tsp mustard", c: "~5 kcal" },
+      { n: "Salt + black pepper + fresh parsley", c: "~0 kcal" },
+    ],
+    method: "Grate carrots finely. Whisk olive oil + lemon juice + mustard + salt + pepper into a dressing. Toss with carrots. Add fresh parsley. Eat immediately for crunch or rest 10 min for a softer texture. Keeps in fridge 2 days. Add to any dinner as a side — pairs especially well with chicken, fish and kessra.",
+    tags: ["FODMAP safe", "No gluten", "No lactose", "3 min prep", "Perfect side"]
+  },
+  {
+    name: "Kessra algérienne — version légère",
+    kcal: "~215 kcal per galette",
+    color: "#8B6914", bg: "#FDF5E0",
+    note: "⚠️ Take GluteoStop — semolina contains gluten",
+    ingredients: [
+      { n: "250g fine semolina (semoule fine de blé dur)", c: "~855 kcal total" },
+      { n: "130ml warm water", c: "0 kcal" },
+      { n: "2 tsp olive oil (total batch — not per galette)", c: "~80 kcal" },
+      { n: "½ tsp salt", c: "0 kcal" },
+      { n: "½ tsp instant dry yeast", c: "~5 kcal" },
+    ],
+    method: "Mix semolina + salt + yeast. Rub olive oil between palms into semolina until every grain is coated — this is the key step. Add warm water gradually, gathering (not kneading) into a smooth firm ball. Cover with cloth, rest 20 min. Divide into 4 balls. Flatten each into a round ~5mm thick, prick all over with a fork. Dry pan on medium heat — no oil. Cook 3–4 min per side until golden with charred spots. Wrap in cloth 5 min before eating. Freeze individually — reheat 1 min dry pan from frozen.",
+    tags: ["Batch-friendly", "Freezer ✓", "Take GluteoStop", "Comfort food", "Memory of home 🤍"]
+  },
+  {
+    name: "Couscous léger au poulet ou bœuf",
+    kcal: "~620 kcal per bowl",
+    color: "#4A7C6B", bg: "#EAF2EF",
+    note: "⚠️ Take GluteoStop — couscous is semolina. Use garlic-infused oil not raw garlic.",
+    ingredients: [
+      { n: "80g dry couscous (fine or medium)", c: "~280 kcal" },
+      { n: "150g batch chicken or beef mince", c: "~165–210 kcal" },
+      { n: "1 courgette + 1 carrot, chunked", c: "~45 kcal" },
+      { n: "200ml vegetable or chicken stock", c: "~10 kcal" },
+      { n: "1 tsp garlic-infused olive oil", c: "~40 kcal" },
+      { n: "Spices: ras el hanout + cumin + cinnamon + ginger", c: "~5 kcal" },
+      { n: "50g coconut yogurt (cold dollop)", c: "~45 kcal" },
+    ],
+    method: "Broth: simmer stock + garlic-infused oil + all spices 3 min. Add courgette + carrot, simmer 10 min until tender. Add batch chicken or beef, warm through 3 min. Couscous: pour 80g into a bowl, add 90ml boiling salted water, cover 5 min, fluff with fork, drizzle ½ tsp olive oil. Plate couscous, ladle veg + meat + broth over, cold coconut yogurt on the side. Keep broth generous — couscous should be moist not dry.",
+    tags: ["Batch protein", "Take GluteoStop", "Weekend comfort", "Algerian classic"]
+  },
+  {
+    name: "Pizza légère maison",
+    kcal: "~580 kcal per pizza",
+    color: "#B85C6E", bg: "#F8ECF0",
+    note: "⚠️ Take GluteoStop. Use GF flour for a lower-gluten version.",
+    ingredients: [
+      { n: "Base: 100g GF flour or buckwheat flour", c: "~340 kcal" },
+      { n: "60ml warm water + ½ tsp yeast + pinch salt + 1 tsp olive oil", c: "~50 kcal" },
+      { n: "3 tbsp tomato passata (sauce)", c: "~20 kcal" },
+      { n: "50g fresh mozzarella, torn", c: "~125 kcal" },
+      { n: "Toppings: cold cherry tomatoes + fresh basil + olives", c: "~30 kcal" },
+      { n: "Drizzle olive oil to finish", c: "~40 kcal" },
+    ],
+    method: "Dough: mix flour + salt + yeast + water + oil into a soft ball. Rest 20 min under cloth. Roll very thin (~3mm) on floured surface. Transfer to a hot oven tray. Sauce: spread passata + garlic powder + oregano. Bake base only at 220°C for 8 min until edges start to colour. Add torn mozzarella. Bake 4–5 min more until cheese melts. Out of oven: add cold cherry tomatoes + fresh basil + olives. The contrast of hot base + cold fresh toppings = proper Italian style. Take lactase for mozzarella.",
+    tags: ["Homemade", "Take GluteoStop + lactase", "Cold toppings ✓", "Friday or weekend treat"]
+  },
+  {
+    name: "Reshta sauce blanche",
+    kcal: "~650 kcal per bowl",
+    color: "#6B5B9E", bg: "#EEE9F8",
+    note: "⚠️ Take GluteoStop for wheat reshta — use flat rice noodles for GF version. Take Fibractase if broth contains onion.",
+    ingredients: [
+      { n: "70g reshta (flat noodles) or flat rice noodles GF", c: "~245 kcal" },
+      { n: "150g beef chunks or batch chicken", c: "~210 kcal" },
+      { n: "1 courgette, chunked", c: "~25 kcal" },
+      { n: "400ml chicken or veg stock", c: "~15 kcal" },
+      { n: "½ tsp olive oil", c: "~20 kcal" },
+      { n: "Spices: cinnamon stick + white pepper + ginger + pinch nutmeg", c: "~5 kcal" },
+    ],
+    method: "Brown beef/chicken in oil 3 min. Cover with stock + cinnamon stick + white pepper + ginger. Simmer 25 min until meat is tender and broth is fragrant. Add courgette chunks, simmer 10 min. Drop noodles in last 4–5 min until they absorb most of the broth. Finish with a pinch of nutmeg. Serve in a deep bowl — broth should be light, white and silky. The cinnamon is the soul of this dish.",
+    tags: ["Festive", "One pot", "GF option: rice noodles", "Algerian classic 🤍"]
+  },
+  {
+    name: "Butternut rôti + viande + merguez",
+    kcal: "~640 kcal per portion",
+    color: "#C47020", bg: "#FDF0E0",
+    note: "⚠️ Butternut: max 70g per portion — FODMAP threshold. Merguez releases its own fat — no extra oil needed.",
+    ingredients: [
+      { n: "70g butternut squash, cubed (FODMAP safe portion)", c: "~30 kcal" },
+      { n: "150g beef or lamb chunks (or batch beef mince)", c: "~210 kcal" },
+      { n: "1 merguez (~60g)", c: "~150 kcal" },
+      { n: "1 courgette, chunked", c: "~25 kcal" },
+      { n: "150ml tomato passata", c: "~45 kcal" },
+      { n: "½ tsp garlic-infused olive oil", c: "~20 kcal" },
+      { n: "Spices: ras el hanout + cumin + cinnamon + paprika", c: "~5 kcal" },
+      { n: "80g jasmine rice or grenaille (side)", c: "~130 kcal" },
+    ],
+    method: "Brown meat + merguez in a deep pan — merguez fat renders out naturally, no extra oil needed. Add butternut + courgette + passata + spices + 200ml water. Simmer covered 25–30 min until meat is tender and butternut is soft but holding its shape. Serve with rice or grenaille alongside. The butternut enriches the sauce with a subtle sweetness that pairs beautifully with the merguez spice.",
+    tags: ["Festive stew", "FODMAP: 70g butternut max", "Batch-friendly", "Weekend only"]
+  },
+  {
+    name: "Hmiss (poivrons grillés à l'huile)",
+    kcal: "~90 kcal per portion",
+    color: "#A83020", bg: "#FAEAE8",
+    note: "⚠️ Bell peppers are HIGH in Vitamin C — bladder sensitivity. Keep to 1–2 peppers max and eat as a side, not the main veg. Avoid if you feel sensitive that day.",
+    ingredients: [
+      { n: "2 red or green bell peppers", c: "~60 kcal" },
+      { n: "1 tsp olive oil", c: "~40 kcal" },
+      { n: "½ tsp garlic-infused olive oil", c: "~20 kcal" },
+      { n: "Salt + cumin + pinch of paprika", c: "~0 kcal" },
+      { n: "Optional: 1 tsp tomato paste (for colour)", c: "~10 kcal" },
+    ],
+    method: "Method 1 (oven): Place whole peppers on a tray at 220°C for 25–30 min, turning halfway, until skin is blackened and blistered. Transfer to a covered bowl for 10 min — steam loosens the skin. Peel, deseed, tear into strips. Season with oils + cumin + salt + optional tomato paste. Method 2 (gas flame): char peppers directly on flame, turning with tongs. Faster and more authentic char. Serve warm or cold as a side. Pairs perfectly with kessra.",
+    tags: ["⚠️ Vit C — max 2 peppers", "Side dish", "Pairs with kessra", "Algerian classic 🤍"]
+  }
+];
+
+const weekendPanel = document.getElementById('panel-weekend');
+weekendPanel.innerHTML = `
+  <div style="font-size:11px;color:var(--muted);margin-bottom:8px;background:var(--soft);border-radius:10px;padding:10px 14px;line-height:1.8;">
+    <strong style="color:var(--deep);">Meal IDs — Weekend cooking:</strong><br>
+    <span style="color:#C4724A;">WK0</span> Salade carottes &nbsp;|&nbsp; <span style="color:#8B6914;">WK1</span> Kessra &nbsp;|&nbsp; <span style="color:#4A7C6B;">WK2</span> Couscous &nbsp;|&nbsp; <span style="color:#B85C6E;">WK3</span> Pizza maison<br>
+    <span style="color:#6B5B9E;">WK4</span> Reshta sauce blanche &nbsp;|&nbsp; <span style="color:#C47020;">WK5</span> Butternut + viande + merguez &nbsp;|&nbsp; <span style="color:#A83020;">WK6</span> Hmiss
+  </div>
+  <div class="warn-box"><strong>Carrot salad [WK0]:</strong> Perfect weekday side — add to any dinner. Takes 3 min, no cooking.</div>`;
+const wkIds = ['WK0','WK1','WK2','WK3','WK4','WK5','WK6'];
+weekendRecipes.forEach((r, i) => {
+  const card = document.createElement('div');
+  card.className = 'dessert-card';
+  card.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;gap:8px;">
+      <span style="font-size:10px;font-weight:600;color:${r.color};background:${r.bg};padding:2px 7px;border-radius:8px;flex-shrink:0;">${wkIds[i]}</span>
+      <div class="dessert-name" style="color:${r.color};flex:1;">${r.name}</div>
+      <span class="day-kcal" style="background:${r.bg};color:${r.color};">${r.kcal}</span>
+    </div>
+    <div class="dessert-sub">${r.note}</div>
+    <button class="dessert-toggle" onclick="this.parentElement.classList.toggle('open');this.textContent=this.parentElement.classList.contains('open')?'Hide ▲':'See recipe ▼'">See recipe ▼</button>
+    <div class="dessert-body">
+      <div class="section-label">Ingredients</div>
+      <ul class="ingr-list">${r.ingredients.map(i=>`<li><span>${i.n}</span><span class="ingr-cal">${i.c}</span></li>`).join('')}</ul>
+      <div class="section-label">Method</div>
+      <p class="method-text">${r.method}</p>
+      <div class="tag-row">${r.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+    </div>`;
+  weekendPanel.appendChild(card);
+});
+</script>
+</body>
+</html>
