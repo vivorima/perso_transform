@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Transformation — Rima</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #F9F6F1; font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+h1 { font-size: 1.6rem; font-weight: 300; color: #1C1A17; margin-bottom: 6px; text-align: center; }
+p { font-size: 13px; color: #8A8278; margin-bottom: 2rem; text-align: center; letter-spacing: 0.06em; text-transform: uppercase; }
+.cards { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 360px; }
+.card { background: white; border: 1px solid #E8E2D9; border-radius: 16px; padding: 20px; text-decoration: none; display: flex; align-items: center; gap: 14px; transition: transform 0.15s; }
+.card:hover { transform: translateY(-2px); }
+.card-icon { font-size: 28px; }
+.card-text h2 { font-size: 15px; font-weight: 500; color: #1C1A17; margin-bottom: 3px; }
+.card-text p { font-size: 12px; color: #8A8278; text-transform: none; letter-spacing: 0; margin: 0; }
+</style>
+</head>
+<body>
+<h1>My Transformation</h1>
+<p>Personal guides · always with you</p>
+<div class="cards">
+  <a class="card" href="weekly_meal_plan.html">
+    <div class="card-icon">🍽️</div>
+    <div class="card-text"><h2>Weekly Meal Plan</h2><p>5-day plan · rotations · weekend cooking · grocery list</p></div>
+  </a>
+  <a class="card" href="skincare_routine.html">
+    <div class="card-icon">🧴</div>
+    <div class="card-text"><h2>Skincare Routine</h2><p>Morning · night · OCD hand protocol · product guide</p></div>
+  </a>
+</div>
+</body>
+</html>
