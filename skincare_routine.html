@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skincare Routine</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F7F3EE;
+    --rose: #C4956A;
+    --deep: #2C2420;
+    --muted: #8C7B72;
+    --soft: #EDE5DC;
+    --green: #6B8F71;
+    --border: #DDD5CC;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--deep);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    color: var(--deep);
+  }
+  .header p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 2rem;
+  }
+  .tab {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 30px;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    background: var(--deep);
+    color: var(--cream);
+    border-color: var(--deep);
+  }
+  .panel { display: none; max-width: 560px; margin: 0 auto; }
+  .panel.active { display: block; }
+
+  .routine-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .routine-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .step {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 12px;
+    background: white;
+    border-radius: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    position: relative;
+    transition: transform 0.15s;
+  }
+  .step:hover { transform: translateY(-1px); }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 500;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .am .step-num { background: #FFF0E0; color: var(--rose); }
+  .pm .step-num { background: #E8EDF5; color: #4A6FA5; }
+  .step-content { flex: 1; }
+  .step-product {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--deep);
+    margin-bottom: 2px;
+  }
+  .step-action {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .step-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top: 5px;
+    display: inline-block;
+    letter-spacing: 0.04em;
+  }
+  .badge-barrier { background: #EAF3DE; color: #3B6D11; }
+  .badge-hydrate { background: #E0EEF8; color: #1A5F8A; }
+  .badge-seal { background: #F5ECD7; color: #7A5020; }
+  .badge-soothe { background: #F0E8F5; color: #6B3A8C; }
+  .badge-ocd { background: #FDECEA; color: #A32D2D; }
+
+  .ocd-box {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .ocd-title {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--deep);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ocd-title::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #E05555;
+    flex-shrink: 0;
+  }
+  .ocd-list { list-style: none; padding: 0; }
+  .ocd-list li {
+    font-size: 12.5px;
+    color: var(--muted);
+    padding: 5px 0;
+    border-bottom: 1px solid var(--soft);
+    line-height: 1.5;
+    display: flex;
+    gap: 8px;
+  }
+  .ocd-list li:last-child { border-bottom: none; }
+  .ocd-list li::before { content: "→"; color: var(--border); flex-shrink: 0; }
+
+  .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .product-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .product-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--deep);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .product-role {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .product-when {
+    font-size: 10px;
+    margin-top: 6px;
+    padding: 2px 7px;
+    border-radius: 8px;
+    display: inline-block;
+    background: var(--soft);
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  .alert-box {
+    background: #FFFBF0;
+    border: 1px solid #F0D9A0;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    font-size: 12.5px;
+    color: #7A6010;
+    line-height: 1.6;
+  }
+  .alert-box strong { color: #5A4608; font-weight: 500; }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Skin Care Ritual</h1>
+  <p>Barrier repair · OCD skin · Dry skin protocol</p>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('am')">☀️ Morning</button>
+  <button class="tab" onclick="switchTab('pm')">🌙 Night</button>
+  <button class="tab" onclick="switchTab('hands')">🤲 Hands (OCD)</button>
+  <button class="tab" onclick="switchTab('products')">🧴 Your products</button>
+</div>
+
+<!-- AM -->
+<div id="panel-am" class="panel active am">
+  <div class="alert-box">
+    <strong>Morning goal:</strong> hydrate, protect the barrier, prep for the day. Keep it light — heavy products in the morning feel uncomfortable and can pill under clothes/headwear.
+  </div>
+  <div class="routine-label">Step by step</div>
+
+  <div class="step am">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <div class="step-product">Rinse with lukewarm water only</div>
+      <div class="step-action">No cleanser in the morning — your skin isn't dirty, just slightly dehydrated from sleep. Water only, max 30 seconds. Pat dry gently with a soft towel, never rub.</div>
+      <span class="step-badge badge-barrier">barrier protection</span>
+    </div>
+  </div>
+
+  <div class="step am">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <div class="step-product">Aloe vera gel — whole face</div>
+      <div class="step-action">Apply a thin layer while skin is still slightly damp. Aloe is your first hydration layer — it preps the skin to absorb everything that comes after. Let it sink in 1 min.</div>
+      <span class="step-badge badge-hydrate">humectant · soothing</span>
+    </div>
+  </div>
+
+  <div class="step am">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <div class="step-product">Neutralgen Hydroboost Aquagel</div>
+      <div class="step-action">Lightweight gel layer on top of aloe. This seals in the first hydration layer without heaviness. Perfect under other products. Small amount, press into skin.</div>
+      <span class="step-badge badge-hydrate">deep hydration</span>
+    </div>
+  </div>
+
+  <div class="step am">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <div class="step-product">iUNIK Beta-Glucan Daily Moisture Cream</div>
+      <div class="step-action">Beta-glucan is one of the best ingredients for damaged skin barriers — it actively helps repair and rebuild. Use this as your main moisturizer in the morning (lighter than the others).</div>
+      <span class="step-badge badge-barrier">barrier repair ⭐</span>
+    </div>
+  </div>
+
+  <div class="step am">
+    <div class="step-num">5</div>
+    <div class="step-content">
+      <div class="step-product">CeraVe Moisturizing Lotion — hands</div>
+      <div class="step-action">After doing your face, apply CeraVe lotion to your hands immediately. Starting the day with moisturized hands makes the OCD washing less damaging throughout the day.</div>
+      <span class="step-badge badge-ocd">OCD habit — do this every morning</span>
+    </div>
+  </div>
+
+  <div class="step am" style="border: 1px dashed #E0A060; background: #FFFAF4;">
+    <div class="step-num" style="background:#FFF0E0; color:#C47020;">!</div>
+    <div class="step-content">
+      <div class="step-product">⚠️ Missing: SPF — add one ASAP</div>
+      <div class="step-action">You don't have an SPF in your current products. Sun damage undoes all barrier repair work and worsens dry skin significantly. Look for: Altruist SPF 50 Fluid (~€4 at pharmacie), or La Roche-Posay Anthelios Invisible Fluid. Apply as the absolute last step every morning.</div>
+      <span class="step-badge badge-ocd">add to grocery list</span>
+    </div>
+  </div>
+</div>
+
+<!-- PM -->
+<div id="panel-pm" class="panel pm">
+  <div class="alert-box">
+    <strong>Night goal:</strong> repair and deeply seal. At night your skin goes into recovery mode — this is when the heavy products work best. Layer from lightest to heaviest, always.
+  </div>
+  <div class="routine-label">Step by step</div>
+
+  <div class="step pm">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <div class="step-product">Gentle cleanse — lukewarm water + minimal cleanser</div>
+      <div class="step-action">Use a gentle syndet cleanser if you have one (Dove Sensitive, Bioderma Atoderm). If not, lukewarm water only for now. Max 60 seconds. Never hot water — it destroys the lipid barrier instantly. Pat dry.</div>
+      <span class="step-badge badge-barrier">never rub, always pat</span>
+    </div>
+  </div>
+
+  <div class="step pm">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <div class="step-product">Aloe vera gel — whole face + neck</div>
+      <div class="step-action">First hydration layer while skin is still slightly damp from cleanse. Apply generously. The moisture you trap right after cleansing is more effective than anything you add later.</div>
+      <span class="step-badge badge-soothe">soothing · calming redness</span>
+    </div>
+  </div>
+
+  <div class="step pm">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <div class="step-product">Neutralgen Hydroboost Aquagel</div>
+      <div class="step-action">Second hydration layer on top of aloe. Let it absorb 1–2 min before next step.</div>
+      <span class="step-badge badge-hydrate">hyaluronic acid boost</span>
+    </div>
+  </div>
+
+  <div class="step pm">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <div class="step-product">Beauty of Joseon Dynasty Dream Cream</div>
+      <div class="step-action">Rich in ceramides, niacinamide, hyaluronic acid and ginseng — this is your star night repair cream. <em>Niacinamide actively strengthens the skin barrier over time</em>, which is exactly what you need. Apply a generous layer, press don't rub.</div>
+      <span class="step-badge badge-barrier">ceramides + niacinamide ⭐</span>
+    </div>
+  </div>
+
+  <div class="step pm">
+    <div class="step-num">5</div>
+    <div class="step-content">
+      <div class="step-product">Dr. Althea 345 Relief Cream</div>
+      <div class="step-action">Apply on any areas that are red, irritated or damaged from washing. This is your targeted repair step — focus on cheeks, around nose, chin, any reactive zones. Can also layer on top of Dynasty Cream on very dry areas.</div>
+      <span class="step-badge badge-soothe">targeted relief</span>
+    </div>
+  </div>
+
+  <div class="step pm">
+    <div class="step-num">6</div>
+    <div class="step-content">
+      <div class="step-product">Vaseline OR Shea Butter — occlusive seal</div>
+      <div class="step-action">The final step — seals everything underneath and prevents overnight moisture loss (called TEWL). Vaseline is lighter and non-comedogenic. Shea butter is richer and more nourishing. Use Vaseline on face, Shea butter on hands and body. A very thin layer is enough — just enough to make skin feel slightly tacky.</div>
+      <span class="step-badge badge-seal">slugging · locks everything in</span>
+    </div>
+  </div>
+
+  <div class="step pm">
+    <div class="step-num">7</div>
+    <div class="step-content">
+      <div class="step-product">Vaseline Intensive Care — hands, thick layer</div>
+      <div class="step-action">Apply a thick layer on hands as the very last thing before sleep. If you can tolerate it, wear thin cotton gloves overnight — it transforms damaged hands within a week. This is the single most impactful thing for OCD hand recovery.</div>
+      <span class="step-badge badge-ocd">OCD recovery — non-negotiable</span>
+    </div>
+  </div>
+</div>
+
+<!-- HANDS -->
+<div id="panel-hands" class="panel">
+  <div class="alert-box">
+    <strong>For OCD overwashing:</strong> the goal isn't to stop washing completely — it's to immediately repair the barrier after every wash so damage doesn't accumulate. Make this automatic.
+  </div>
+
+  <div class="ocd-box">
+    <div class="ocd-title">The 20-second wash rule</div>
+    <ul class="ocd-list">
+      <li>Set a timer on your phone for 20 seconds before you start washing</li>
+      <li>Use lukewarm water only — never hot (hot = barrier destruction)</li>
+      <li>Use a fragrance-free liquid soap if possible (Sanex Zero, Dove Sensitive)</li>
+      <li>When the timer ends — stop. The compulsion wants more. The timer is your anchor.</li>
+      <li>Pat dry immediately — never air dry (evaporation pulls moisture from the skin)</li>
+    </ul>
+  </div>
+
+  <div class="ocd-box">
+    <div class="ocd-title">After EVERY wash — the 2-product rule</div>
+    <ul class="ocd-list">
+      <li><strong>Immediately after drying:</strong> CeraVe Moisturizing Lotion — apply to still-slightly-damp hands, rub in fully</li>
+      <li><strong>If hands are very irritated/red:</strong> add a thin layer of Vaseline on top to seal</li>
+      <li>Keep your CeraVe lotion next to every sink you use — kitchen, bathroom, work</li>
+      <li>The moment of applying cream is also a moment to pause and breathe — use it as a reset ritual</li>
+    </ul>
+  </div>
+
+  <div class="ocd-box">
+    <div class="ocd-title">Weekly repair treatment (Sunday night)</div>
+    <ul class="ocd-list">
+      <li>After your full PM routine: apply a very thick layer of shea butter to both hands</li>
+      <li>Put on thin cotton gloves (€3 at pharmacie or Amazon)</li>
+      <li>Sleep with the gloves on</li>
+      <li>In the morning: hands will feel noticeably softer and less cracked</li>
+      <li>Do this every Sunday — results visible within 2–3 weeks</li>
+    </ul>
+  </div>
+
+  <div class="ocd-box">
+    <div class="ocd-title">Products to add to your list</div>
+    <ul class="ocd-list">
+      <li>Fragrance-free liquid hand soap (Sanex Zero or Dove Sensitive)</li>
+      <li>Cotton gloves for overnight treatment (~€3 pharmacie)</li>
+      <li>SPF face fluid for morning routine</li>
+      <li>Gentle syndet cleanser for face (Bioderma Atoderm Gel Moussant or Dove Sensitive bar)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<div id="panel-products" class="panel">
+  <div class="routine-label">What each product does for you</div>
+  <div class="product-grid">
+    <div class="product-card">
+      <div class="product-name">Aloe Vera Gel</div>
+      <div class="product-role">First hydration layer, calms redness and irritation, preps skin for absorption</div>
+      <span class="product-when">AM step 2 · PM step 2</span>
+    </div>
+    <div class="product-card">
+      <div class="product-name">Neutralgen Hydroboost Aquagel</div>
+      <div class="product-role">Lightweight water-binding gel, seals in first hydration layer without heaviness</div>
+      <span class="product-when">AM step 3 · PM step 3</span>
+    </div>
+    <div class="product-card">
+      <div class="product-name">iUNIK Beta-Glucan Cream</div>
+      <div class="product-role">Barrier repair specialist — beta-glucan actively rebuilds damaged skin. Your AM workhorse.</div>
+      <span class="product-when">AM step 4 only</span>
+    </div>
+    <div class="product-card">
+      <div class="product-name">Beauty of Joseon Dynasty Dream</div>
+      <div class="product-role">Ceramides + niacinamide + hyaluronic acid. Best night repair cream you own. Strengthens barrier over time.</div>
+      <span class="product-when">PM step 4 only ⭐</span>
+    </div>
+    <div class="product-card">
+      <div class="product-name">Dr. Althea 345 Relief Cream</div>
+      <div class="product-role">Targeted soothing on irritated/red zones. Apply where skin is most damaged from washing.</div>
+      <span class="product-when">PM step 5 — targeted</span>
+    </div>
+    <div class="product-card">
+      <div class="product-name">CeraVe Moisturizing Lotion</div>
+      <div class="product-role">Quick-absorbing ceramide lotion. Your everyday hand moisturizer — apply after every wash.</div>
+      <span class="product-when">Hands — after every wash</span>
+    </div>
+    <div class="product-card">
+      <div class="product-name">Vaseline Intensive Care</div>
+      <div class="product-role">Occlusive seal — locks in all layers underneath. Use as final face step at night + on hands.</div>
+      <span class="product-when">PM step 6 · hands PM</span>
+    </div>
+    <div class="product-card">
+      <div class="product-name">Organic Shea Butter</div>
+      <div class="product-role">Rich overnight repair for hands and body. Best used in the Sunday overnight glove treatment.</div>
+      <span class="product-when">Hands — Sunday overnight</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="routine-label">What you're missing</div>
+  <div class="ocd-box">
+    <ul class="ocd-list">
+      <li><strong>SPF (urgent):</strong> No sun protection = all barrier repair work undone by daylight. Altruist SPF 50 Fluid ~€4.</li>
+      <li><strong>Gentle face cleanser:</strong> Bioderma Atoderm Gel, Dove Sensitive bar, or La Roche-Posay Toleriane. ~€5–8.</li>
+      <li><strong>Fragrance-free hand soap:</strong> Sanex Zero% or Dove Sensitive liquid. Reduces irritation per wash.</li>
+      <li><strong>Cotton gloves:</strong> For the Sunday overnight hand treatment. ~€3 at pharmacie.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const map = ['am','pm','hands','products'];
+  document.querySelectorAll('.tab')[map.indexOf(id)].classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+}
+</script>
+</body>
+</html>
