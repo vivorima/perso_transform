@@ -371,7 +371,23 @@ const rotations = [
     tags: ["Batch protein", "Hands-off", "One dish", "No gluten", "FODMAP safe"]
   },
   {
-    name: "Curry coco + poulet + courgette + riz ⭐",
+    name: "Gnocchis GF + crevettes + haricots verts + sauce tomate",
+    vibe: "Comfort · Italian · quick 15 min",
+    color: "#C4724A", bg: "#FBF0EA",
+    total: 590,
+    ingredients: [
+      { name: "150g gnocchis GF (Schar)", cal: "~180 kcal" },
+      { name: "150g crevettes (decongeler 10 min)", cal: "~120 kcal" },
+      { name: "Handful haricots verts, vapeur 4 min", cal: "~20 kcal" },
+      { name: "150ml passata tomates", cal: "~45 kcal" },
+      { name: "1 tsp huile d'olive a l'ail", cal: "~40 kcal" },
+      { name: "Basilic + origan + poivre noir", cal: "~5 kcal" },
+      { name: "30g mozzarella fraiche, torn", cal: "~75 kcal" },
+    ],
+    method: "<strong>Faire bouillir</strong> les gnocchis 2–3 min jusqu'a ce qu'ils remontent a la surface, egoutter. <strong>Vapeur</strong> haricots verts 4 min. <strong>Poele:</strong> rechauffer crevettes dans l'huile a l'ail 2 min. Ajouter passata + epices, mijoter 3 min. Ajouter gnocchis, melanger. <strong>Dresser:</strong> gnocchis + crevettes + sauce, haricots verts sur le cote, mozzarella dechiquetee sur le dessus encore chaud. Servir immediatement — les gnocchis collent en refroidissant.",
+    batch: "Crevettes pre-cuites surgelees — decongeler seulement. Aucune preparation par lot necessaire.",
+    tags: ["R10", "15 min", "No batch", "Prendre lactase mozza", "Prendre GluteoStop si gnocchis normaux"]
+  },
     vibe: "Favourite · silky · fragrant · warming",
     color: "#B85C6E", bg: "#F8ECF0",
     total: 640,
@@ -396,9 +412,9 @@ rotatePanel.innerHTML = `
     <strong style="color:var(--deep);">Meal IDs — Rotations:</strong><br>
     <span style="color:#3A6EA5;">R1</span> Thon grenaille &nbsp;|&nbsp; <span style="color:#C4724A;">R2</span> Tortillas poulet &nbsp;|&nbsp; <span style="color:#4A7C6B;">R3</span> Risotto crevettes &nbsp;|&nbsp; <span style="color:#B85C6E;">R4</span> Saumon fumé riz<br>
     <span style="color:#6B5B9E;">R5</span> Flatbread bœuf &nbsp;|&nbsp; <span style="color:#A83020;">R6</span> Boulettes vermicelles &nbsp;|&nbsp; <span style="color:#4A7C6B;">R7</span> Sardines patate douce<br>
-    <span style="color:#C47020;">R8</span> Riz au four &nbsp;|&nbsp; <span style="color:#B85C6E;">R9</span> Curry coco ⭐
+    <span style="color:#C47020;">R8</span> Riz au four &nbsp;|&nbsp; <span style="color:#B85C6E;">R9</span> Curry coco ⭐ &nbsp;|&nbsp; <span style="color:#C4724A;">R10</span> Gnocchis crevettes
   </div>`;
-const rIds = ['R1','R2','R3','R4','R5','R6','R7','R8','R9'];
+const rIds = ['R1','R2','R3','R4','R5','R6','R7','R8','R9','R10'];
 rotations.forEach((d, i) => {
   const pct = Math.min(100, Math.round(d.total / 680 * 100));
   const barColor = d.total > 680 ? '#E24B4A' : '#1D9E75';
